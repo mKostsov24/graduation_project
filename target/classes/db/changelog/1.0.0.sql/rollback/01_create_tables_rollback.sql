@@ -1,0 +1,16 @@
+drop sequence if exists user_seq  CASCADE;
+drop table if exists users CASCADE;
+drop sequence if exists post_seq  CASCADE;
+drop table if exists posts CASCADE;
+drop sequence if exists post_comment_seq CASCADE;
+drop table if exists post_comments CASCADE;
+drop sequence if exists post_vote_seq CASCADE;
+drop table if exists post_votes CASCADE;
+drop sequence if exists tag_seq CASCADE;
+drop table if exists tags CASCADE;
+drop sequence if exists tag_to_post_seq CASCADE;
+drop table if exists tag_to_post CASCADE;
+drop sequence if exists captcha_code_seq CASCADE;
+drop table if exists captcha_codes CASCADE;
+drop sequence if exists global_setting_seq CASCADE;
+drop table if exists global_settings CASCADE;
