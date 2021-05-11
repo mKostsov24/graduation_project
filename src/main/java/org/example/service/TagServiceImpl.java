@@ -44,12 +44,8 @@ public class TagServiceImpl implements TagService {
                 .forEach(tags -> tagDTOList.add(
                         new TagDTO(
                                 tags, tagsMap.get(tags.getName()))));
-        tagDTOList.sort(new Comparator<TagDTO>() {
-            public int compare(TagDTO one, TagDTO two) {
-                return Long.compare(
-                        two.getTotalPostsWithTag(), one.getTotalPostsWithTag());
-            }
-        });
+        tagDTOList.sort((one, two) -> Long.compare(
+                two.getTotalPostsWithTag(), one.getTotalPostsWithTag()));
         TagDTO maxValue = tagDTOList.get(0);
         maxValue.setDWeight(COUNT_ACTIVE_POST);
         maxValue.setMaxWeight(1);

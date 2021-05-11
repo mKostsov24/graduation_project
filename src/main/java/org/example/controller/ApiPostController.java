@@ -23,13 +23,13 @@ public class ApiPostController {
         this.postsService = postsService;
     }
 
-    @GetMapping
-    public PostCountDTO getPosts(
-            @RequestParam(name = "offset", defaultValue = "0") int offset,
-            @RequestParam(name = "limit", defaultValue = "10") int limit,
-            @RequestParam(name = "mode", defaultValue = "recent") String mode) {
-        return postsService.getAllPostsWithConditions(offset/limit, limit, mode);
-    }
+//    @GetMapping
+//    public PostCountDTO getPosts(
+//            @RequestParam(name = "offset", defaultValue = "0") int offset,
+//            @RequestParam(name = "limit", defaultValue = "10") int limit,
+//            @RequestParam(name = "mode", defaultValue = "recent") String mode) {
+//        return postsService.getAllPostsWithConditions(offset/limit, limit, mode);
+//    }
 
     @GetMapping("/search")
     public PostCountDTO searchPosts(
@@ -60,7 +60,7 @@ public class ApiPostController {
         if (principal == null) {
             return postsService.getById(id);
         }
-        return postsService.getByIdNonAuth(id, principal.getName());
+        return postsService.getByIdAuth(id, principal.getName());
     }
 
     @GetMapping("/my")

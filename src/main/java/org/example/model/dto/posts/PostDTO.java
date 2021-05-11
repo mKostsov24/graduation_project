@@ -2,6 +2,7 @@ package org.example.model.dto.posts;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Data;
+import lombok.Getter;
 import org.example.model.Posts;
 import org.example.model.dto.users.UserPostAuthorDTO;
 import org.jsoup.Jsoup;

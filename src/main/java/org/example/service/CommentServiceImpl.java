@@ -9,6 +9,7 @@ import org.example.repository.UserRepository;
 import org.example.service.api.CommentService;
 import org.example.utils.ErrorsList;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
@@ -32,7 +33,7 @@ public class CommentServiceImpl implements CommentService {
     public ResponseEntity<?> addComment(NewCommentDTO commentDTO, String user) {
         Map<String, Object> errors = validateCommentInputAndGetErrors(commentDTO);
 
-        if (postRepository.findPostById(commentDTO.getPostId()) == null) {
+        if (postRepository.findByIdModer(commentDTO.getPostId(), Pageable.unpaged()) == null) {
             return ResponseEntity.ok(new ErrorDTO(false, errors));
         } else if (errors.size() > 0) {
             return ResponseEntity.badRequest().body(new ErrorDTO(false, errors));
@@ -48,7 +49,7 @@ public class CommentServiceImpl implements CommentService {
         } else {
             postComments.setParentId(null);
         }
-        postComments.setPost(postRepository.findPostById(commentDTO.getPostId()));
+        postComments.setPost(postRepository.findByIdModer(commentDTO.getPostId(), Pageable.unpaged()).getContent().get(0));
         postComments.setTime(Instant.now());
         postComments.setText(commentDTO.getText());
 

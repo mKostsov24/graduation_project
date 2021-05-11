@@ -21,10 +21,6 @@ public interface PostRepository extends JpaRepository<Posts, Integer> {
     @Query("SELECT p FROM Posts p WHERE p.isActive = true AND p.moderationStatus = 'ACCEPTED' AND p.time <= NOW()")
     Page<Posts> findAllActive(Pageable pageable);
 
-    @Query(value = "SELECT p.* FROM Posts p join post_votes pv on p.id = pv.post_id where is_active = true" +
-            " AND moderation_status = 'ACCEPTED' AND p.time <= NOW() group by p.id order by count(pv.value) desc", nativeQuery = true)
-    Page<Posts> findAllActiveByVotes(Pageable pageable);
-
     @Query(value = "SELECT p.* FROM Posts p join post_comments pc on p.id = pc.post_id where is_active = true " +
             "AND moderation_status = 'ACCEPTED' AND p.time <= NOW() group by p.id order by count(pc.id) desc", nativeQuery = true)
     Page<Posts> findAllActiveByComments(Pageable pageable);
@@ -46,6 +42,9 @@ public interface PostRepository extends JpaRepository<Posts, Integer> {
     @Query("SELECT p FROM Posts p WHERE p.isActive = true AND p.moderationStatus = 'ACCEPTED' AND p.time <= NOW() and p.id = :id")
     Page<Posts> findById(@Param("id") int id, Pageable pageable);
 
+    @Query("select p from Posts p where p.id = :id")
+    Page<Posts> findByIdModer(@Param("id") int id, Pageable pageable);
+
     @Query("SELECT p FROM Posts p WHERE p.isActive = true AND p.moderationStatus = 'ACCEPTED' AND p.time <= NOW()" +
             " AND to_char(p.time, 'YYYY-mm-dd') = :date_requested")
     Page<Posts> findAllPostsByDate(@Param("date_requested") String dateRequested, Pageable pageable);
@@ -54,10 +53,8 @@ public interface PostRepository extends JpaRepository<Posts, Integer> {
     @Query("update Posts p set p.viewCount = p.viewCount + 1 WHERE p.id = :id")
     void updateCount(@Param("id") int id);
 
-
     @Query("SELECT p FROM Posts p WHERE p.isActive = true AND p.moderationStatus = 'ACCEPTED' AND p.user = :user ")
     Page<Posts> findAllPublished(@Param("user") Users user, Pageable pageable);
-
 
     @Query("SELECT p FROM Posts p WHERE p.isActive = true AND p.moderationStatus = 'NEW' AND p.user = :user ")
     Page<Posts> findAllPending(@Param("user") Users user, Pageable pageable);
@@ -71,15 +68,11 @@ public interface PostRepository extends JpaRepository<Posts, Integer> {
     @Query("SELECT count(p) FROM Posts p WHERE p.moderationStatus = 'NEW'")
     int getCountOfNotModeratedPosts();
 
-    @Query("select p from Posts p where p.id = :id")
-    Posts findPostById(@Param("id") int id);
-
     @Query("SELECT count(p) FROM Posts p WHERE p.user = :user and p.isActive = true AND p.moderationStatus = 'ACCEPTED' AND p.time <= NOW()")
     int getCountOfUserPosts(@Param("user") Users user);
 
     @Query("SELECT COALESCE(sum(p.viewCount),0) FROM Posts p WHERE p.user = :user and p.isActive = true AND p.moderationStatus = 'ACCEPTED' AND p.time <= NOW()")
     int getCountOfUserPostsView(@Param("user") Users user);
-
 
     @Query("SELECT count(p) FROM Posts p WHERE p.isActive = true AND p.moderationStatus = 'ACCEPTED' AND p.time <= NOW()")
     int getCountOfAllPosts();
@@ -97,7 +90,6 @@ public interface PostRepository extends JpaRepository<Posts, Integer> {
     @Modifying
     @Query("update Posts p set p.moderationStatus = :status, p.moderatorId = :moder  WHERE p.id = :id ")
     void updateModerationStatusPost(@Param("status") ModerationStatus status, @Param("moder") Users moder, @Param("id") int id);
-
 
     @Query("SELECT p FROM Posts p WHERE p.user = :user and p.isActive = true AND p.moderationStatus = 'ACCEPTED' order by p.time  asc")
     Posts getFirstPostOfUser(@Param("user") Users user);

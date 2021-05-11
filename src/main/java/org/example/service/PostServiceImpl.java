@@ -18,6 +18,7 @@ import org.springframework.stereotype.Service;
 
 import java.time.Instant;
 import java.util.*;
+import java.util.stream.Collectors;
 
 @Service
 public class PostServiceImpl implements PostService {
@@ -55,9 +56,12 @@ public class PostServiceImpl implements PostService {
                         .forEach(posts -> postDTOList.add(new PostDTO(posts)));
                 break;
             case ("best"):
-                postRepository.findAllActiveByVotes(
+                postRepository.findAllActive(
                         PageRequest.of(offset, limit))
                         .forEach(posts -> postDTOList.add(new PostDTO(posts)));
+
+                postDTOList.sort((one, two) -> Long.compare(
+                        two.getId(), one.getId()));
                 break;
             default:
                 postRepository.findAllActive(
@@ -208,23 +212,23 @@ public class PostServiceImpl implements PostService {
 
     public ResponseEntity<?> updatePost(NewPostDTO postDTO, Integer id, String email) {
         Map<String, Object> errors = validatePostInputAndGetErrors(postDTO);
-        if (errors.size() > 0 || postRepository.findPostById(id) == null || !postRepository.findPostById(id).getUser().getEmail().equals(email)) {
+        if (errors.size() > 0 || postRepository.findByIdModer(id, Pageable.unpaged()) == null || !postRepository.findByIdModer(id, Pageable.unpaged()).getContent().get(0).getUser().getEmail().equals(email)) {
             return ResponseEntity.ok(new ErrorDTO(false, errors));
         } else {
 
             ModerationStatus moderationStatus = ModerationStatus.NEW;
             if (userRepository.findByEmail(email).isModerator()) {
-                moderationStatus = postRepository.findPostById(id).getModerationStatus();
+                moderationStatus = postRepository.findByIdModer(id, Pageable.unpaged()).getContent().get(0).getModerationStatus();
             }
 
             postRepository.updatePost(moderationStatus, postDTO.getText(), postDTO.getTitle(), postDTO.isActive(), postDTO.getTime(), id);
             editTagToPost(id, postDTO);
-            postRepository.findPostById(id).getTagsList().forEach(
+            postRepository.findByIdModer(id, Pageable.unpaged()).getContent().get(0).getTagsList().forEach(
                     t -> {
                         if (!postDTO.getTags().contains(t.getName())) {
                             tagToPostRepository.deleteById(
                                     tagToPostRepository.getByTagAndPost(
-                                            tagRepository.findByName(t.getName()), postRepository.findPostById(id)).getId());
+                                            tagRepository.findByName(t.getName()), postRepository.findByIdModer(id, Pageable.unpaged()).getContent().get(0)).getId());
                         }
                     });
             return ResponseEntity.ok(new ErrorDTO(true, null));
@@ -240,9 +244,9 @@ public class PostServiceImpl implements PostService {
                         tagRepository.save(newTags);
                     }
                     if (tagToPostRepository.getByTagAndPost(
-                            tagRepository.findByName(t), postRepository.findPostById(id)) == null) {
+                            tagRepository.findByName(t), postRepository.findByIdModer(id, Pageable.unpaged()).getContent().get(0)) == null) {
                         TagToPost newTagToPost = new TagToPost();
-                        newTagToPost.setPost(postRepository.findPostById(id));
+                        newTagToPost.setPost(postRepository.findByIdModer(id, Pageable.unpaged()).getContent().get(0));
                         newTagToPost.setTag(tagRepository.findByName(t));
                         tagToPostRepository.save(newTagToPost);
                     }
@@ -267,7 +271,7 @@ public class PostServiceImpl implements PostService {
     public Map<String, Boolean> addLikeAndDislike(NewVoteDTO newVoteDTO, String user, int value) {
         Map<String, Boolean> response = new HashMap<>();
         PostVotes currentPostVotes = postVoteRepository.findByPostAndUser(
-                postRepository.findPostById(newVoteDTO.getId()), userRepository.findByEmail(user));
+                postRepository.findByIdModer(newVoteDTO.getId(), Pageable.unpaged()).getContent().get(0), userRepository.findByEmail(user));
         if (currentPostVotes != null
                 && currentPostVotes.getValue() == value) {
             response.put("result", false);
@@ -278,7 +282,7 @@ public class PostServiceImpl implements PostService {
             return response;
         }
         PostVotes vote = new PostVotes();
-        vote.setPost(postRepository.findPostById(newVoteDTO.getId()));
+        vote.setPost(postRepository.findByIdModer(newVoteDTO.getId(), Pageable.unpaged()).getContent().get(0));
         vote.setUser(userRepository.findByEmail(user));
         vote.setTime(Instant.now());
         vote.setValue(value);
@@ -289,7 +293,7 @@ public class PostServiceImpl implements PostService {
         return response;
     }
 
-    public ResponseEntity<?> getByIdNonAuth(int id, String email) {
+    public ResponseEntity<?> getByIdAuth(int id, String email) {
         if (postRepository.findById(id, Pageable.unpaged()) == null) {
             return ResponseEntity
                     .status(HttpStatus.NOT_FOUND)
@@ -297,13 +301,19 @@ public class PostServiceImpl implements PostService {
                             .format(ErrorsList.STRING_POST_NOT_FOUND, id))
                     );
         }
-        if (postRepository.findPostById(id).getUser().getEmail().equals(email) ||
+        if (postRepository.findByIdModer(id, Pageable.unpaged()).getContent().get(0).getUser().getEmail().equals(email) ||
                 userRepository.findByEmail(email).isModerator()) {
-            Posts post = postRepository.findPostById(id);
+            Posts post = postRepository.findByIdModer(id, Pageable.unpaged()).getContent().get(0);
+            post.getCommentsList().sort(Comparator.comparingLong(one -> one.getTime().getEpochSecond()));
+//            post.getCommentsList().sort((one, two) -> Long.compare(
+//                    two.getTime().getEpochSecond(), one.getTime().getEpochSecond()));
             return ResponseEntity.ok(new PostByIdDTO(post));
         } else {
             postRepository.updateCount(id);
             Posts post = postRepository.findById(id, Pageable.unpaged()).getContent().get(0);
+            post.getCommentsList().sort(Comparator.comparingLong(one -> one.getTime().getEpochSecond()));
+//            post.getCommentsList().sort((one, two) -> Long.compare(
+//                    two.getTime().getEpochSecond(), one.getTime().getEpochSecond()));
             return ResponseEntity.ok(new PostByIdDTO(post));
         }
     }
@@ -318,13 +328,6 @@ public class PostServiceImpl implements PostService {
         }
         postRepository.updateCount(id);
         Posts post = postRepository.findById(id, Pageable.unpaged()).getContent().get(0);
-        post.getCommentsList().sort(new Comparator<PostComments>() {
-            public int compare(PostComments one, PostComments two) {
-                return Long.compare(
-                        two.getTime().getEpochSecond(), one.getTime().getEpochSecond());
-            }
-        });
-
         return ResponseEntity.ok(new PostByIdDTO(post));
     }
 
@@ -360,7 +363,7 @@ public class PostServiceImpl implements PostService {
 
     public ResponseEntity<?> moderationPosts(ModerationPostDTO postDTO, String email) {
 
-        if (postRepository.findPostById(postDTO.getPostId()) == null) {
+        if (postRepository.findByIdModer(postDTO.getPostId(), Pageable.unpaged()) == null) {
             return ResponseEntity.badRequest().body(new ErrorDTO(false, null));
         }
 
