@@ -1,1 +1,1 @@
-web: java -Dserver.port=$PORT -jar target/blog-engine-1.0.jar
+ web: java $JAVA_OPTS -jar -Dserver.port=$PORT target/blog-engine-1.0.jar
