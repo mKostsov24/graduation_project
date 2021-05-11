@@ -42,6 +42,7 @@ public class AuthService {
         userResponse.setName(currentUser.getName());
         userResponse.setModeration(currentUser.isModerator());
         userResponse.setId(currentUser.getId());
+        userResponse.setPhoto(currentUser.getPhoto());
 
         LoginResponse loginResponse = new LoginResponse();
         loginResponse.setResult(true);
