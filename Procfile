@@ -1,1 +1,1 @@
-web: java -jar target/blog-engine-1.0.jar
+web: java -Dserver.port=${PORT:33500} -jar target/blog-engine-1.0.jar
