@@ -23,13 +23,13 @@ public class ApiPostController {
         this.postsService = postsService;
     }
 
-//    @GetMapping
-//    public PostCountDTO getPosts(
-//            @RequestParam(name = "offset", defaultValue = "0") int offset,
-//            @RequestParam(name = "limit", defaultValue = "10") int limit,
-//            @RequestParam(name = "mode", defaultValue = "recent") String mode) {
-//        return postsService.getAllPostsWithConditions(offset/limit, limit, mode);
-//    }
+    @GetMapping
+    public PostCountDTO getPosts(
+            @RequestParam(name = "offset", defaultValue = "0") int offset,
+            @RequestParam(name = "limit", defaultValue = "10") int limit,
+            @RequestParam(name = "mode", defaultValue = "recent") String mode) {
+        return postsService.getAllPostsWithConditions(offset/limit, limit, mode);
+    }
 
     @GetMapping("/search")
     public PostCountDTO searchPosts(

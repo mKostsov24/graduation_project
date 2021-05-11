@@ -59,9 +59,8 @@ public class PostServiceImpl implements PostService {
                 postRepository.findAllActive(
                         PageRequest.of(offset, limit))
                         .forEach(posts -> postDTOList.add(new PostDTO(posts)));
-
                 postDTOList.sort((one, two) -> Long.compare(
-                        two.getId(), one.getId()));
+                        two.getLikeCount(), one.getLikeCount()));
                 break;
             default:
                 postRepository.findAllActive(
@@ -304,16 +303,16 @@ public class PostServiceImpl implements PostService {
         if (postRepository.findByIdModer(id, Pageable.unpaged()).getContent().get(0).getUser().getEmail().equals(email) ||
                 userRepository.findByEmail(email).isModerator()) {
             Posts post = postRepository.findByIdModer(id, Pageable.unpaged()).getContent().get(0);
-            post.getCommentsList().sort(Comparator.comparingLong(one -> one.getTime().getEpochSecond()));
-//            post.getCommentsList().sort((one, two) -> Long.compare(
-//                    two.getTime().getEpochSecond(), one.getTime().getEpochSecond()));
+//            post.getCommentsList().sort(Comparator.comparingLong(one -> one.getTime().getEpochSecond()));
+            post.getCommentsList().sort((one, two) -> Long.compare(
+                    two.getTime().getEpochSecond(), one.getTime().getEpochSecond()));
             return ResponseEntity.ok(new PostByIdDTO(post));
         } else {
             postRepository.updateCount(id);
             Posts post = postRepository.findById(id, Pageable.unpaged()).getContent().get(0);
-            post.getCommentsList().sort(Comparator.comparingLong(one -> one.getTime().getEpochSecond()));
-//            post.getCommentsList().sort((one, two) -> Long.compare(
-//                    two.getTime().getEpochSecond(), one.getTime().getEpochSecond()));
+//            post.getCommentsList().sort(Comparator.comparingLong(one -> one.getTime().getEpochSecond()));
+            post.getCommentsList().sort((one, two) -> Long.compare(
+                    two.getTime().getEpochSecond(), one.getTime().getEpochSecond()));
             return ResponseEntity.ok(new PostByIdDTO(post));
         }
     }
@@ -328,6 +327,9 @@ public class PostServiceImpl implements PostService {
         }
         postRepository.updateCount(id);
         Posts post = postRepository.findById(id, Pageable.unpaged()).getContent().get(0);
+        post.getCommentsList().sort((one, two) -> Long.compare(
+                two.getTime().getEpochSecond(), one.getTime().getEpochSecond()));
+//        post.getCommentsList().sort(Comparator.comparingLong(one -> one.getTime().getEpochSecond()));
         return ResponseEntity.ok(new PostByIdDTO(post));
     }
 
