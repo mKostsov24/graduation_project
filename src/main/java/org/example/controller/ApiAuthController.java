@@ -42,14 +42,17 @@ public class ApiAuthController {
 
     @PostMapping("/login")
     public ResponseEntity<LoginResponse> login(@RequestBody LoginRequest loginRequest) {
-        Authentication auth = authenticationManager
-                .authenticate(
-                        new UsernamePasswordAuthenticationToken(
-                                loginRequest.getEmail(), loginRequest.getPassword()));
-
-        SecurityContextHolder.getContext().setAuthentication(auth);
-        User user = (User) auth.getPrincipal();
-        return ResponseEntity.ok(authService.getLoginResponse(user.getUsername()));
+        try {
+            Authentication auth = authenticationManager
+                    .authenticate(
+                            new UsernamePasswordAuthenticationToken(
+                                    loginRequest.getEmail(), loginRequest.getPassword()));
+            SecurityContextHolder.getContext().setAuthentication(auth);
+            User user = (User) auth.getPrincipal();
+            return ResponseEntity.ok(authService.getLoginResponse(user.getUsername()));
+        } catch (Exception exception){
+            return ResponseEntity.ok(new LoginResponse(false, null));
+        }
     }
 
     @GetMapping("/logout")
