@@ -93,7 +93,7 @@ public class UserServiceImpl {
 
 
             final String port = "8080";
-            final String hostName = InetAddress.getLoopbackAddress().getHostName();
+            final String hostName = "kostsov-java-skillbox.herokuapp.com";
             final String url = String.format(ErrorsList.STRING_AUTH_SERVER_URL, hostName, port);
 
             emailServiceImpl.sendSimpleMessage(
