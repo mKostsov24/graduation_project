@@ -92,9 +92,8 @@ public class UserServiceImpl {
             userRepository.setCodeValue(code, userRepository.findByEmail(email).getId());
 
 
-            final String port = "8080";
             final String hostName = "kostsov-java-skillbox.herokuapp.com";
-            final String url = String.format(ErrorsList.STRING_AUTH_SERVER_URL, hostName, port);
+            final String url = String.format(ErrorsList.STRING_AUTH_SERVER_URL, hostName);
 
             emailServiceImpl.sendSimpleMessage(
                     email,

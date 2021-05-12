@@ -27,7 +27,7 @@ public class ErrorsList {
     public static final String STRING_PASSWORD_SHORT =  "Пароль короче 6-ти символов";
     public static final String STRING_CAPTCHA_INVALID =  "Код с картинки введён неверно";
     public static final String STRING_AUTH_MAIL_SUBJECT = "Ссылка на восстановление пароля";
-    public static final String STRING_AUTH_SERVER_URL = "http://%s:%s";
+    public static final String STRING_AUTH_SERVER_URL = "http://%s";
     public static final String STRING_AUTH_MAIL_MESSAGE = "Для восстановления пароля, " +
             "пройдите по этой ссылке: %s/login/change-password/%s";
     //    -----validateProfileUpdate------
