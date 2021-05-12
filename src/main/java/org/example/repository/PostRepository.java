@@ -65,7 +65,7 @@ public interface PostRepository extends JpaRepository<Posts, Integer> {
     @Query("SELECT p FROM Posts p WHERE p.isActive = false AND p.user = :user")
     Page<Posts> findAllInactive(@Param("user") Users user, Pageable pageable);
 
-    @Query("SELECT count(p) FROM Posts p WHERE p.moderationStatus = 'NEW'")
+    @Query("SELECT count(p) FROM Posts p WHERE p.moderationStatus = 'NEW' and p.isActive = true")
     int getCountOfNotModeratedPosts();
 
     @Query("SELECT count(p) FROM Posts p WHERE p.user = :user and p.isActive = true AND p.moderationStatus = 'ACCEPTED' AND p.time <= NOW()")
