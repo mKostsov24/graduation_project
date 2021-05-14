@@ -13,6 +13,7 @@ import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Instant;
+import java.util.List;
 
 @Repository
 @Transactional
@@ -80,9 +81,6 @@ public interface PostRepository extends JpaRepository<Posts, Integer> {
     @Query("SELECT COALESCE(sum(p.viewCount),0) FROM Posts p WHERE  p.isActive = true AND p.moderationStatus = 'ACCEPTED' AND p.time <= NOW()")
     int getCountOfAllPostsView();
 
-    @Query(value = "SELECT  p.* FROM Posts p WHERE p.is_active = true AND p.moderation_status = 'ACCEPTED' order by p.time ASC LIMIT 1", nativeQuery = true)
-    Posts getFirstPostDataOfAll();
-
     @Modifying
     @Query("update Posts p set p.time = :time, p.moderationStatus = :status , p.isActive = :active, p.title = :title, p.text = :text  WHERE p.id = :id ")
     void updatePost(@Param("status") ModerationStatus status, @Param("text") String text, @Param("title") String title, @Param("active") boolean active, @Param("time") Instant time, @Param("id") int id);
@@ -92,6 +90,9 @@ public interface PostRepository extends JpaRepository<Posts, Integer> {
     void updateModerationStatusPost(@Param("status") ModerationStatus status, @Param("moder") Users moder, @Param("id") int id);
 
     @Query("SELECT p FROM Posts p WHERE p.user = :user and p.isActive = true AND p.moderationStatus = 'ACCEPTED' order by p.time  asc")
-    Posts getFirstPostOfUser(@Param("user") Users user);
+    List<Posts> getFirstPostOfUser(@Param("user") Users user);
+
+    @Query(value = "SELECT  p.* FROM Posts p WHERE p.is_active = true AND p.moderation_status = 'ACCEPTED' order by p.time ASC LIMIT 1", nativeQuery = true)
+    Posts getFirstPostDataOfAll();
 
 }

@@ -33,7 +33,7 @@ public class StatisticServiceImpl {
         myStatistic.setLikesCount(postVoteRepository.getCountOfUserVotes(currentUser.getId(), 1));
         myStatistic.setViewsCount(postRepository.getCountOfUserPostsView(currentUser));
         if (postRepository.getFirstPostOfUser(currentUser) != null) {
-            myStatistic.setFirstPublication(postRepository.getFirstPostOfUser(currentUser).getTime().getEpochSecond());
+            myStatistic.setFirstPublication(postRepository.getFirstPostOfUser(currentUser).get(0).getTime().getEpochSecond());
         } else {
             myStatistic.setFirstPublication(0);
         }

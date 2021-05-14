@@ -9,6 +9,7 @@ import org.example.repository.*;
 import org.example.service.api.PostService;
 import org.example.utils.ErrorsList;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
@@ -293,9 +294,9 @@ public class PostServiceImpl implements PostService {
     }
 
     public ResponseEntity<?> getByIdAuth(int id, String email) {
-        if (postRepository.findById(id, Pageable.unpaged()) == null) {
+        if ( postRepository.findById(id, Pageable.unpaged()).isEmpty()) {
             return ResponseEntity
-                    .status(HttpStatus.NOT_FOUND)
+                    .badRequest()
                     .body((String
                             .format(ErrorsList.STRING_POST_NOT_FOUND, id))
                     );
@@ -308,7 +309,7 @@ public class PostServiceImpl implements PostService {
                     two.getTime().getEpochSecond(), one.getTime().getEpochSecond()));
             return ResponseEntity.ok(new PostByIdDTO(post));
         } else {
-            postRepository.updateCount(id);
+            viewIncrement(id);
             Posts post = postRepository.findById(id, Pageable.unpaged()).getContent().get(0);
 //            post.getCommentsList().sort(Comparator.comparingLong(one -> one.getTime().getEpochSecond()));
             post.getCommentsList().sort((one, two) -> Long.compare(
@@ -318,14 +319,14 @@ public class PostServiceImpl implements PostService {
     }
 
     public ResponseEntity<?> getById(int id) {
-        if (postRepository.findById(id, Pageable.unpaged()) == null) {
+        if ( postRepository.findById(id, Pageable.unpaged()).isEmpty()) {
             return ResponseEntity
-                    .status(HttpStatus.NOT_FOUND)
+                    .badRequest()
                     .body((String
                             .format(ErrorsList.STRING_POST_NOT_FOUND, id))
                     );
         }
-        postRepository.updateCount(id);
+        viewIncrement(id);
         Posts post = postRepository.findById(id, Pageable.unpaged()).getContent().get(0);
         post.getCommentsList().sort((one, two) -> Long.compare(
                 two.getTime().getEpochSecond(), one.getTime().getEpochSecond()));
@@ -375,5 +376,9 @@ public class PostServiceImpl implements PostService {
             postRepository.updateModerationStatusPost(ModerationStatus.DECLINED, userRepository.findByEmail(email), postDTO.getPostId());
         }
         return ResponseEntity.ok(new ErrorDTO(true, null));
+    }
+
+    private void viewIncrement(int id){
+        postRepository.updateCount(id);
     }
 }
