@@ -10,8 +10,6 @@ import org.springframework.web.multipart.MultipartFile;
 import javax.servlet.http.HttpServletRequest;
 import java.io.File;
 import java.io.IOException;
-import java.io.InputStream;
-import java.nio.file.*;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
@@ -22,6 +20,17 @@ public class ImageService {
     private String result;
     private String path;
 
+    private static String getRandomPath() {
+        StringBuilder sb = new StringBuilder();
+        sb.append("/upload/");
+        for (int iteration = 0; iteration < 3; iteration++) {
+            for (int ch = 0; ch < 2; ch++) {
+                sb.append((char) (new Random().nextInt('z' - 'a') + 'a'));
+            }
+            sb.append("/");
+        }
+        return sb.toString();
+    }
 
     public String getPath() {
         return path;
@@ -39,40 +48,26 @@ public class ImageService {
         if (errors.size() > 0) {
             return ResponseEntity.badRequest().body(new ErrorDTO(false, errors));
         }
-        else {
+        try {
+            String uploadsDir = getRandomPath() + file.getOriginalFilename();
+            String realPath = request.getServletContext().getRealPath(uploadsDir);
 
-            try {
-                String uploadsDir = getRandomPath() + file.getOriginalFilename() ;
-                String realPath = request.getServletContext().getRealPath(uploadsDir);
+            byte[] inputStream = file.getBytes();
 
-                byte[] inputStream = file.getBytes();
+            File photo = new File(realPath);
+            FileUtils.writeByteArrayToFile(photo, inputStream);
 
-                File photo = new File(realPath);
-                FileUtils.writeByteArrayToFile( photo , inputStream);
-
-                result = uploadsDir.replace('\\', '/');
-                path = realPath ;
-                return ResponseEntity.ok(result);
-            } catch (IOException e) {
-                errors.put("image", e.getMessage());
-                return ResponseEntity.badRequest().body(new ErrorDTO(false, errors));
-            }
-
-        }}
-
-    private static String getRandomPath() {
-        StringBuilder sb = new StringBuilder();
-        sb.append("/upload/");
-        for (int iteration = 0; iteration < 3; iteration++) {
-            for (int ch = 0; ch < 2; ch++) {
-                sb.append((char) (new Random().nextInt('z' - 'a') + 'a'));
-            }
-            sb.append("/");
+            result = uploadsDir.replace('\\', '/');
+            path = realPath;
+            return ResponseEntity.ok(result);
+        } catch (IOException e) {
+            errors.put("image", e.getMessage());
+            return ResponseEntity.badRequest().body(new ErrorDTO(false, errors));
         }
-        return sb.toString();
+
     }
 
-    public Map<String, Object> validateFile(MultipartFile file, String filename ) {
+    public Map<String, Object> validateFile(MultipartFile file, String filename) {
         Map<String, Object> errorsMap = new HashMap<>();
 
         if (filename.toLowerCase().matches("(?!.*(?:\\.jpe?g|\\.gif|\\.png)$)")) {

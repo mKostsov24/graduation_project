@@ -15,7 +15,6 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.net.InetAddress;
 import java.time.Instant;
 import java.util.HashMap;
 import java.util.Map;
@@ -51,17 +50,17 @@ public class UserServiceImpl {
         Map<String, Object> errors = validateUserInputAndGetErrors(user);
         if (errors.size() > 0) {
             return ResponseEntity.ok(new ErrorDTO(false, errors));
-        } else {
-            userRepository.save(new Users
-                    .Builder()
-                    .setName(user.getName())
-                    .setEmail(user.getEmail())
-                    .setPassword(securityConfig.passwordEncoder().encode(user.getPassword()))
-                    .setRegTime(Instant.now()).build());
-            Map<String, Boolean> successfully = new HashMap<>();
-            successfully.put("result", true);
-            return ResponseEntity.ok(successfully);
         }
+        userRepository.save(new Users
+                .Builder()
+                .setName(user.getName())
+                .setEmail(user.getEmail())
+                .setPassword(securityConfig.passwordEncoder().encode(user.getPassword()))
+                .setRegTime(Instant.now()).build());
+        Map<String, Boolean> successfully = new HashMap<>();
+        successfully.put("result", true);
+        return ResponseEntity.ok(successfully);
+
     }
 
     private Map<String, Object> validateUserInputAndGetErrors(NewUserDTO user) {
@@ -91,21 +90,18 @@ public class UserServiceImpl {
 
             userRepository.setCodeValue(code, userRepository.findByEmail(email).getId());
 
-
             final String hostName = "kostsov-java-skillbox.herokuapp.com";
             final String url = String.format(ErrorsList.STRING_AUTH_SERVER_URL, hostName);
 
             emailServiceImpl.sendSimpleMessage(
                     email,
                     ErrorsList.STRING_AUTH_MAIL_SUBJECT,
-                    String.format(ErrorsList.STRING_AUTH_MAIL_MESSAGE, url, code)
-            );
+                    String.format(ErrorsList.STRING_AUTH_MAIL_MESSAGE, url, code));
 
             return ResponseEntity.ok(new ErrorDTO(true, null));
-
-        } else {
-            return ResponseEntity.ok(new ErrorDTO(false, null));
         }
+        return ResponseEntity.ok(new ErrorDTO(false, null));
+
     }
 
     @Transactional
@@ -113,12 +109,12 @@ public class UserServiceImpl {
         Map<String, Object> errors = validateNewPasswordAndGetErrors(newPasswordRequestDTO);
         if (errors.size() > 0) {
             return ResponseEntity.ok(new ErrorDTO(false, errors));
-        } else {
-            userRepository.setNewPassword(passwordEncoder.encode(newPasswordRequestDTO.getPassword()),
-                    userRepository.getByCode(newPasswordRequestDTO.getCode()).getId());
-            userRepository.setCodeNull(userRepository.getByCode(newPasswordRequestDTO.getCode()).getId());
-            return ResponseEntity.ok(new ErrorDTO(true, null));
         }
+        userRepository.setNewPassword(
+                passwordEncoder.encode(newPasswordRequestDTO.getPassword()),
+                userRepository.getByCode(newPasswordRequestDTO.getCode()).getId());
+        userRepository.setCodeNull(userRepository.getByCode(newPasswordRequestDTO.getCode()).getId());
+        return ResponseEntity.ok(new ErrorDTO(true, null));
     }
 
     private Map<String, Object> validateNewPasswordAndGetErrors(NewPasswordRequestDTO newPasswordRequestDTO) {

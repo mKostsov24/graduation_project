@@ -4,9 +4,7 @@ public class ErrorsList {
     public static final String STRING_POST_NOT_FOUND = "Пост с идентификатором '%d' не найден!";
     public static final String STRING_SETTING_NOT_FOUND = "В базе нет таких настроек";
     public static final String STRING_FIELD_CANT_BE_BLANK = "Поле не может быть пустым";
-    public static final String STRING_AUTH_INVALID_EMAIL = "Адрес указан неверно";
     public static final String STRING_AUTH_SHORT_PASSWORD = "Слишком короткий пароль";
-    public static final String STRING_COMPLETED_SUCCESSFULLY = "ОК";
 //    -----validateUser------
     public static final String STRING_AUTH_EMAIL_ALREADY_REGISTERED = "Почта уже зарегистрирована";
     public static final int INT_AUTH_MIN_PASSWORD_LENGTH = 6 ;

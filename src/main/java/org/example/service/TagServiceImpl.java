@@ -12,7 +12,6 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
-import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -58,11 +57,11 @@ public class TagServiceImpl implements TagService {
                 });
         if (queryName.equals("")) {
             return tagDTOList;
-        } else {
-            return tagDTOList
-                    .stream()
-                    .filter(tagDTO -> tagDTO.getName().equals(queryName)).collect(Collectors.toList());
         }
+        return tagDTOList
+                .stream()
+                .filter(tagDTO -> tagDTO.getName().equals(queryName)).collect(Collectors.toList());
+
     }
 
     public TagCountDTO getWeightsTags(String queryName) {

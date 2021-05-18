@@ -54,9 +54,8 @@ public class StatisticServiceImpl {
             allStatistic.setDislikesCount(postVoteRepository.getCountOfAllVotes(-1));
             allStatistic.setLikesCount(postVoteRepository.getCountOfAllVotes(1));
             return ResponseEntity.ok(allStatistic);
-        } else {
-            return ResponseEntity.badRequest().body("Unauthorized");
         }
+        return ResponseEntity.badRequest().body("Unauthorized");
     }
 
     public ResponseEntity<?> getAllStatisticNonAuth() {
@@ -72,9 +71,9 @@ public class StatisticServiceImpl {
             allStatistic.setDislikesCount(postVoteRepository.getCountOfAllVotes(-1));
             allStatistic.setLikesCount(postVoteRepository.getCountOfAllVotes(1));
             return ResponseEntity.ok(allStatistic);
-        } else {
-            return ResponseEntity.badRequest().body("Unauthorized");
         }
+        return ResponseEntity.badRequest().body("Unauthorized");
+
 
     }
 }

@@ -43,9 +43,9 @@ public class CommentServiceImpl implements CommentService {
         if (commentDTO.getParentId() != null) {
             if (commentRepository.findById(Integer.parseInt(commentDTO.getParentId())) == null) {
                 return ResponseEntity.ok(new ErrorDTO(false, errors));
-            } else {
-                postComments.setParentId(commentRepository.findById(Integer.parseInt(commentDTO.getParentId())));
             }
+            postComments.setParentId(commentRepository.findById(Integer.parseInt(commentDTO.getParentId())));
+
         } else {
             postComments.setParentId(null);
         }

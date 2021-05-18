@@ -42,38 +42,38 @@ public class ProfileServiceImpl {
         Map<String, Object> errors = validateNewProfileInputAndGetErrors(newProfileDTO, currentUser);
         if (errors.size() > 0) {
             return ResponseEntity.badRequest().body(new ErrorDTO(false, errors));
-        } else {
-            if (newProfileDTO.getName() != null && !currentUser.getName().equals(newProfileDTO.getName())) {
-                usersRepository.setNewName(newProfileDTO.getName(), currentUser.getId());
-            }
-            if (newProfileDTO.getEmail() != null && !currentUser.getEmail().equals(newProfileDTO.getEmail())) {
-                usersRepository.setNewEmail(newProfileDTO.getEmail(), currentUser.getId());
-            }
-
-            if (newProfileDTO.getPassword() != null) {
-                usersRepository.setNewPassword(securityConfig.passwordEncoder().encode(newProfileDTO.getPassword()), currentUser.getId());
-            }
-
-            if (!newProfileDTO.isRemovePhoto()) {
-                System.out.println(currentUser.getId());
-                usersRepository.deletePhoto(currentUser.getId());
-            }
-
-            if (newProfileDTO.getPhoto() != null) {
-
-                MultipartFile file = newProfileDTO.getPhoto();
-                String filename = StringUtils.cleanPath(Objects.requireNonNull(file.getOriginalFilename()));
-                Map<String, Object> imageMap = imageService.validateFile(file, filename);
-                if (imageMap.size() > 0) {
-                    return ResponseEntity.badRequest().body(new ErrorDTO(false, imageMap));
-                }
-                imageService.store(newProfileDTO.getPhoto(), request);
-                resize(file, imageService.getPath());
-                usersRepository.setNewPhoto(imageService.getResult(), currentUser.getId());
-
-            }
-            return ResponseEntity.ok(new ErrorDTO(true, null));
         }
+        if (newProfileDTO.getName() != null && !currentUser.getName().equals(newProfileDTO.getName())) {
+            usersRepository.setNewName(newProfileDTO.getName(), currentUser.getId());
+        }
+        if (newProfileDTO.getEmail() != null && !currentUser.getEmail().equals(newProfileDTO.getEmail())) {
+            usersRepository.setNewEmail(newProfileDTO.getEmail(), currentUser.getId());
+        }
+
+        if (newProfileDTO.getPassword() != null) {
+            usersRepository.setNewPassword(securityConfig.passwordEncoder().encode(newProfileDTO.getPassword()), currentUser.getId());
+        }
+
+        if (!newProfileDTO.isRemovePhoto()) {
+            System.out.println(currentUser.getId());
+            usersRepository.deletePhoto(currentUser.getId());
+        }
+
+        if (newProfileDTO.getPhoto() != null) {
+
+            MultipartFile file = newProfileDTO.getPhoto();
+            String filename = StringUtils.cleanPath(Objects.requireNonNull(file.getOriginalFilename()));
+            Map<String, Object> imageMap = imageService.validateFile(file, filename);
+            if (imageMap.size() > 0) {
+                return ResponseEntity.badRequest().body(new ErrorDTO(false, imageMap));
+            }
+            imageService.store(newProfileDTO.getPhoto(), request);
+            resize(file, imageService.getPath());
+            usersRepository.setNewPhoto(imageService.getResult(), currentUser.getId());
+
+        }
+        return ResponseEntity.ok(new ErrorDTO(true, null));
+
     }
 
     private Map<String, Object> validateNewProfileInputAndGetErrors(NewProfileDTO newProfileDTO, Users currentUser) {
