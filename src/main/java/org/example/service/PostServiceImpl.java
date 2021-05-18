@@ -85,7 +85,7 @@ public class PostServiceImpl implements PostService {
                     postDTOList, postRepository.findAllActive(
                     Pageable.unpaged())
                     .getSize());
-        } else {
+        }
             postRepository.findAllPostsByQuery(
                     query, PageRequest.of(offset, limit, Sort.by("time").descending()))
                     .forEach(posts -> postDTOList.add(new PostDTO(posts)));
@@ -93,12 +93,12 @@ public class PostServiceImpl implements PostService {
                     postDTOList, postRepository.findAllPostsByQuery(
                     query, Pageable.unpaged())
                     .getSize());
-        }
+
     }
 
     public PostCountDTO getAllPostsByTag(int offset, int limit, String tag) {
         List<PostDTO> postDTOList = new ArrayList<>();
-        if (tag.trim().length() == 0) {
+        if (tag.isBlank()) {
             postRepository.findAllActive(
                     PageRequest.of(offset, limit, Sort.by("time").descending()))
                     .forEach(posts -> postDTOList.add(new PostDTO(posts)));
@@ -106,7 +106,7 @@ public class PostServiceImpl implements PostService {
                     postDTOList, postRepository.findAllActive(
                     Pageable.unpaged())
                     .getSize());
-        } else {
+        }
             postRepository.findAllActiveByTag(tag, PageRequest.of(
                     offset, limit, Sort.by("time").descending()))
                     .forEach(posts -> postDTOList.add(new PostDTO(posts)));
@@ -114,7 +114,7 @@ public class PostServiceImpl implements PostService {
                     postDTOList, postRepository.findAllActiveByTag(
                     tag, Pageable.unpaged())
                     .getSize());
-        }
+
     }
 
     public PostCountDTO getAllPostsByDate(int offset, int limit, String Date) {
@@ -127,7 +127,7 @@ public class PostServiceImpl implements PostService {
                     postDTOList, postRepository.findAllActive(
                     Pageable.unpaged())
                     .getSize());
-        } else {
+        }
             postRepository.findAllPostsByDate(
                     Date, PageRequest.of(offset, limit, Sort.by("time").descending()))
                     .forEach(posts -> postDTOList.add(new PostDTO(posts)));
@@ -135,7 +135,7 @@ public class PostServiceImpl implements PostService {
                     postDTOList, postRepository.findAllPostsByDate(
                     Date, Pageable.unpaged())
                     .getSize());
-        }
+
     }
 
     public PostCountDTO getAllPostsByEmail(int offset, int limit, String status, String email) {
@@ -189,7 +189,7 @@ public class PostServiceImpl implements PostService {
         Map<String, Object> errors = validatePostInputAndGetErrors(postDTO);
         if (errors.size() > 0) {
             return ResponseEntity.ok(new ErrorDTO(false, errors));
-        } else {
+        }
             Posts newPost = new Posts();
             if (!settingService.getGlobalSettings().isPostPremoderation()) {
                 newPost.setModerationStatus(ModerationStatus.ACCEPTED);
@@ -207,14 +207,14 @@ public class PostServiceImpl implements PostService {
             editTagToPost(idNewPOst, postDTO);
 
             return ResponseEntity.ok(new ErrorDTO(true, null));
-        }
+
     }
 
     public ResponseEntity<?> updatePost(NewPostDTO postDTO, Integer id, String email) {
         Map<String, Object> errors = validatePostInputAndGetErrors(postDTO);
         if (errors.size() > 0 || postRepository.findByIdModer(id, Pageable.unpaged()) == null || !postRepository.findByIdModer(id, Pageable.unpaged()).getContent().get(0).getUser().getEmail().equals(email)) {
             return ResponseEntity.ok(new ErrorDTO(false, errors));
-        } else {
+        }
 
             ModerationStatus moderationStatus = ModerationStatus.NEW;
             if (userRepository.findByEmail(email).isModerator()) {
@@ -232,7 +232,7 @@ public class PostServiceImpl implements PostService {
                         }
                     });
             return ResponseEntity.ok(new ErrorDTO(true, null));
-        }
+
     }
 
     private void editTagToPost(int id, NewPostDTO postDTO) {
@@ -308,14 +308,14 @@ public class PostServiceImpl implements PostService {
             post.getCommentsList().sort((one, two) -> Long.compare(
                     two.getTime().getEpochSecond(), one.getTime().getEpochSecond()));
             return ResponseEntity.ok(new PostByIdDTO(post));
-        } else {
+        }
             viewIncrement(id);
             Posts post = postRepository.findById(id, Pageable.unpaged()).getContent().get(0);
 //            post.getCommentsList().sort(Comparator.comparingLong(one -> one.getTime().getEpochSecond()));
             post.getCommentsList().sort((one, two) -> Long.compare(
                     two.getTime().getEpochSecond(), one.getTime().getEpochSecond()));
             return ResponseEntity.ok(new PostByIdDTO(post));
-        }
+
     }
 
     public ResponseEntity<?> getById(int id) {
