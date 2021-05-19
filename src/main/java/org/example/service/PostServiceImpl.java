@@ -212,7 +212,8 @@ public class PostServiceImpl implements PostService {
 
     public ResponseEntity<?> updatePost(NewPostDTO postDTO, Integer id, String email) {
         Map<String, Object> errors = validatePostInputAndGetErrors(postDTO);
-        if (errors.size() > 0 || postRepository.findByIdModer(id, Pageable.unpaged()) == null || !postRepository.findByIdModer(id, Pageable.unpaged()).getContent().get(0).getUser().getEmail().equals(email)) {
+        if (errors.size() > 0 || postRepository.findByIdModer(id, Pageable.unpaged()) == null ||
+                !postRepository.findByIdModer(id, Pageable.unpaged()).getContent().get(0).getUser().getEmail().equals(email)) {
             return ResponseEntity.ok(new ErrorDTO(false, errors));
         }
 
